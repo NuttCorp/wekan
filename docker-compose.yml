@@ -1,0 +1,47 @@
+version: '2'
+
+services:
+  database:
+    image: 'mongo:4.4'
+    restart: always
+    volumes:
+      - 'database_config:/data/configdb'
+      - 'database_data:/data/db'
+  frontend:
+    image: 'wekanteam/wekan:latest'
+    restart: always
+    volumes:
+      - 'frontend_config:/etc/influxdb:rw'
+      - 'frontend_data:/var/lib/influxdb:rw'
+    depends_on:
+      - database
+    environment:
+      - ROOT_URL=https://tasks.test.com
+      - MONGO_URL=mongodb://database
+      - MAIL_URL=smtp://user%40test.com:password@smtp.test.com:587
+      - MAIL_FROM='Wekan Notifications <wekan@test.com>'
+      - LDAP_ENABLE=true
+      - LDAP_HOST=192.168.134.25
+      - LDAP_BASEDN="OU=Users,DC=COSCO,DC=COM"
+      - LDAP_LOGIN_FALLBACK=true
+      - LDAP_AUTHENTIFICATION=true
+      - LDAP_AUTHENTIFICATION_USERDN="CN=WekanLDAP,OU=Support Accounts,DC=COSCO,DC=COM"
+      - LDAP_AUTHENTIFICATION_PASSWORD="password"
+      - LDAP_REJECT_UNAUTHORIZED=false
+      - LDAP_USER_SEARCH_FIELD="sAMAccountName"
+      - LDAP_USERNAME_FIELD="sAMAccountName"
+      - LDAP_FULLNAME_FIELD="cn"
+      - LDAP_SEARCH_SIZE_LIMIT=200
+      - LDAP_DEFAULT_DOMAIN="cosco.com"
+      - LDAP_LOG_ENABLED=true
+    ports:
+      - '8080:8080'
+volumes:
+  database_config:
+    driver: local
+  database_data:
+    driver: local
+  frontend_config:
+    driver: local
+  frontend_data:
+    driver: local
